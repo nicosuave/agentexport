@@ -6,8 +6,8 @@ use std::path::{Path, PathBuf};
 use crate::transcript::{Tool, codex_home_dir};
 
 // Embed files at compile time
-const CLAUDE_COMMAND: &str = include_str!("../commands/claude/agentexport.md");
-const CODEX_PROMPT: &str = include_str!("../skills/codex/agentexport.md");
+const CLAUDE_SKILL: &str = include_str!("../skills/claude/agentexport.md");
+const CODEX_SKILL: &str = include_str!("../skills/codex/agentexport.md");
 
 pub fn run() -> Result<()> {
     let theme = ColorfulTheme::default();
@@ -23,10 +23,10 @@ pub fn run() -> Result<()> {
     // Show what will be installed
     println!("This will install:");
     if claude_path.is_some() {
-        println!("  Claude Code: /agentexport command");
+        println!("  Claude Code: agentexport skill");
     }
     if codex_path.is_some() {
-        println!("  Codex: /agentexport prompt");
+        println!("  Codex: agentexport skill");
     }
     println!();
 
@@ -62,10 +62,10 @@ pub fn run() -> Result<()> {
         let (tool, _) = &items[index];
         match tool {
             Tool::Claude => {
-                install_claude_command()?;
+                install_claude_skill()?;
             }
             Tool::Codex => {
-                install_codex_prompt()?;
+                install_codex_skill()?;
             }
         }
     }
@@ -76,35 +76,51 @@ pub fn run() -> Result<()> {
     Ok(())
 }
 
-fn install_claude_command() -> Result<()> {
-    let dest_dir = ensure_claude_commands_dir()?;
-    let dest = dest_dir.join("agentexport.md");
+fn install_claude_skill() -> Result<()> {
+    let skill_dir = ensure_claude_skills_dir()?.join("agentexport");
+    let dest = skill_dir.join("SKILL.md");
+
+    // Clean up old command location if it exists
+    let old_command = claude_home_dir()?.join("commands").join("agentexport.md");
+    if old_command.exists() {
+        fs::remove_file(&old_command)?;
+        println!("Removed old command at {}.", old_command.display());
+    }
+
     if dest.exists() {
         println!(
-            "Skipping Claude command (already installed at {}).",
+            "Skipping Claude skill (already installed at {}).",
             dest.display()
         );
         return Ok(());
     }
-    fs::create_dir_all(&dest_dir)?;
-    fs::write(&dest, CLAUDE_COMMAND)?;
-    println!("Installed Claude command to {}.", dest.display());
+    fs::create_dir_all(&skill_dir)?;
+    fs::write(&dest, CLAUDE_SKILL)?;
+    println!("Installed Claude skill to {}.", dest.display());
     Ok(())
 }
 
-fn install_codex_prompt() -> Result<()> {
-    let dest_dir = ensure_codex_prompts_dir()?;
-    let dest = dest_dir.join("agentexport.md");
+fn install_codex_skill() -> Result<()> {
+    let skill_dir = ensure_codex_skills_dir()?.join("agentexport");
+    let dest = skill_dir.join("SKILL.md");
+
+    // Clean up old prompt location if it exists
+    let old_prompt = codex_home_dir()?.join("prompts").join("agentexport.md");
+    if old_prompt.exists() {
+        fs::remove_file(&old_prompt)?;
+        println!("Removed old prompt at {}.", old_prompt.display());
+    }
+
     if dest.exists() {
         println!(
-            "Skipping Codex prompt (already installed at {}).",
+            "Skipping Codex skill (already installed at {}).",
             dest.display()
         );
         return Ok(());
     }
-    fs::create_dir_all(&dest_dir)?;
-    fs::write(&dest, CODEX_PROMPT)?;
-    println!("Installed Codex prompt to {}.", dest.display());
+    fs::create_dir_all(&skill_dir)?;
+    fs::write(&dest, CODEX_SKILL)?;
+    println!("Installed Codex skill to {}.", dest.display());
     Ok(())
 }
 
@@ -113,14 +129,14 @@ fn claude_home_dir() -> Result<PathBuf> {
     Ok(PathBuf::from(home).join(".claude"))
 }
 
-fn ensure_claude_commands_dir() -> Result<PathBuf> {
-    let dir = claude_home_dir()?.join("commands");
+fn ensure_claude_skills_dir() -> Result<PathBuf> {
+    let dir = claude_home_dir()?.join("skills");
     fs::create_dir_all(&dir)?;
     Ok(dir)
 }
 
-fn ensure_codex_prompts_dir() -> Result<PathBuf> {
-    let dir = codex_home_dir()?.join("prompts");
+fn ensure_codex_skills_dir() -> Result<PathBuf> {
+    let dir = codex_home_dir()?.join("skills");
     fs::create_dir_all(&dir)?;
     Ok(dir)
 }

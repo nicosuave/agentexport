@@ -22,15 +22,15 @@ Or
 curl -fsSL https://agentexports.com/setup | sh
 ```
 
-Then run setup to install commands:
+Then run setup to install skills:
 
 ```bash
 agentexport setup
 ```
 
 This will:
-- **Claude Code**: Install the `/agentexport` command
-- **Codex**: Install the `/agentexport` prompt
+- **Claude Code**: Install the agentexport skill
+- **Codex**: Install the agentexport skill
 
 Restart Claude/Codex after setup.
 
